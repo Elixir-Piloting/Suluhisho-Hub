@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="notifications-container">
+    <h1 class="page-title">Notifications</h1>
+
+    <div class="notifications-list">
+        {% if notifications %}
+            {% for notification in notifications %}
+                <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                    <div class="notification-content">
+                        <div class="notification-message">{{ notification.content }}</div>
+                        <div class="notification-meta">
+                            <span class="notification-time">{{ notification.created_at|timeago }}</span>
+                            {% if notification.related_type %}
+                                <span class="notification-type">{{ notification.related_type }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="notification-actions">
+                        {% if notification.related_id %}
+                            <a href="{{ url_for('posts.view', post_id=notification.related_id) }}" 
+                               class="btn-link">View</a>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('notifications.delete', notification_id=notification._id) }}"
+                              class="inline-form" onsubmit="return confirm('Delete this notification?');">
+                            <button type="submit" class="btn-text-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% if total > per_page %}
+                <div class="pagination">
+                    {% for p in range(1, (total // per_page) + 2) %}
+                        <a href="{{ url_for('main.notifications', page=p) }}"
+                           class="page-link {% if p == page %}active{% endif %}">
+                            {{ p }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <p>No notifications yet</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.notifications-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.page-title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.notifications-list {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.notification-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-item.unread {
+    background-color: #f0f7ff;
+}
+
+.notification-item.unread:hover {
+    background-color: #e6f3ff;
+}
+
+.notification-content {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.notification-message {
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.notification-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.notification-time {
+    color: #999;
+}
+
+.notification-type {
+    background: #e9ecef;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-link {
+    color: #007bff;
+    text-decoration: none;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.btn-link:hover {
+    background-color: #f0f7ff;
+}
+
+.btn-text-danger {
+    color: #dc3545;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.btn-text-danger:hover {
+    background-color: #fff5f5;
+}
+
+.inline-form {
+    display: inline;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.page-link {
+    color: #007bff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.page-link:hover {
+    background-color: #f0f7ff;
+}
+
+.page-link.active {
+    background-color: #007bff;
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+</style>
+{% endblock %} 

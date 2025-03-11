@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Reports{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+.admin-container {
+    padding: 20px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-title {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 15px;
+}
+
+.admin-nav a {
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.admin-nav a:hover {
+    background: #f8f9fa;
+    color: #007bff;
+}
+
+.admin-nav a.active {
+    background: #007bff;
+    color: white;
+}
+
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.report-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.report-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.report-type {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.report-type i {
+    font-size: 1.2rem;
+}
+
+.report-type.post {
+    color: #1976d2;
+}
+
+.report-type.comment {
+    color: #388e3c;
+}
+
+.report-type.suggestion {
+    color: #f57c00;
+}
+
+.report-status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-reviewed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-dismissed {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.report-content {
+    padding: 15px;
+}
+
+.report-title {
+    font-size: 1.1rem;
+    color: #333;
+    margin: 0 0 10px;
+}
+
+.report-text {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0 0 15px;
+    line-height: 1.5;
+}
+
+.report-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.report-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.author-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.report-actions {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-view {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.btn-view:hover {
+    background: #dee2e6;
+}
+
+.btn-remove {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.btn-remove:hover {
+    background: #f5c6cb;
+}
+
+.btn-dismiss {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.btn-dismiss:hover {
+    background: #d6d8d9;
+}
+
+.no-reports {
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.no-reports i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+
+.no-reports p {
+    color: #666;
+    margin: 0;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-page {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #666;
+    text-decoration: none;
+}
+
+.btn-page.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1 class="admin-title">Manage Reports</h1>
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin.index') }}">Dashboard</a>
+            <a href="{{ url_for('admin.users') }}">Users</a>
+            <a href="{{ url_for('admin.reports') }}" class="active">Reports</a>
+            <a href="{{ url_for('admin.settings') }}">Settings</a>
+        </nav>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if reports %}
+        <div class="reports-grid">
+            {% for report in reports %}
+            <div class="report-card">
+                <div class="report-header">
+                    <div class="report-type {{ report.type }}">
+                        <i class="fas fa-{{ 'file-alt' if report.type == 'post' else 'comment' if report.type == 'comment' else 'lightbulb' }}"></i>
+                        {{ report.type|title }}
+                    </div>
+                    <span class="report-status status-{{ report.status }}">
+                        {{ report.status|title }}
+                    </span>
+                </div>
+
+                <div class="report-content">
+                    <h3 class="report-title">{{ report.title }}</h3>
+                    <p class="report-text">{{ report.reason }}</p>
+                    <div class="report-meta">
+                        <div class="report-author">
+                            <img src="{{ report.reporter.profile_picture or url_for('static', filename='images/default-avatar.png') }}" 
+                                 alt="{{ report.reporter.username }}" class="author-avatar">
+                            <span>Reported by {{ report.reporter.username }}</span>
+                        </div>
+                        <span>{{ report.created_at|timeago }}</span>
+                    </div>
+                </div>
+
+                <div class="report-actions">
+                    <a href="{{ url_for('admin.view_content', content_type=report.content_type, content_id=report.content_id) }}" 
+                       class="btn-action btn-view">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    <form action="{{ url_for('admin.remove_content', content_type=report.type, content_id=report.content_id) }}" 
+                          method="POST" style="display: inline;">
+                        <button type="submit" class="btn-action btn-remove" 
+                                onclick="return confirm('Are you sure you want to remove this content?');">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </form>
+                    <form action="{{ url_for('admin.dismiss_report', report_id=report._id) }}" 
+                          method="POST" style="display: inline;">
+                        <button type="submit" class="btn-action btn-dismiss">
+                            <i class="fas fa-times"></i> Dismiss
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if total > per_page %}
+            <div class="pagination">
+                {% set pages = (total / per_page)|round(0, 'ceil')|int %}
+                {% if page > 1 %}
+                    <a href="{{ url_for('admin.reports', page=page-1) }}" class="btn-page">&laquo; Previous</a>
+                {% endif %}
+                
+                {% for p in range(max(1, page-2), min(pages+1, page+3)) %}
+                    <a href="{{ url_for('admin.reports', page=p) }}" 
+                       class="btn-page {% if p == page %}active{% endif %}">{{ p }}</a>
+                {% endfor %}
+                
+                {% if page < pages %}
+                    <a href="{{ url_for('admin.reports', page=page+1) }}" class="btn-page">Next &raquo;</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="no-reports">
+            <i class="fas fa-check-circle"></i>
+            <p>No reports to review at the moment.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

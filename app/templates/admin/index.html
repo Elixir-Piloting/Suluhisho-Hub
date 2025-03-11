@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+.admin-container {
+    padding: 20px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-title {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 15px;
+}
+
+.admin-nav a {
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.admin-nav a:hover {
+    background: #f8f9fa;
+    color: #007bff;
+}
+
+.admin-nav a.active {
+    background: #007bff;
+    color: white;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.5rem;
+}
+
+.stat-icon.users {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.stat-icon.posts {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.stat-icon.comments {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+
+.stat-icon.suggestions {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.stat-info {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.action-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.action-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #007bff;
+}
+
+.action-title {
+    font-size: 1.1rem;
+    color: #333;
+    margin: 0;
+}
+
+.action-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.recent-activity {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.activity-title {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0;
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #007bff;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-text {
+    color: #333;
+    margin: 0;
+}
+
+.activity-meta {
+    font-size: 0.875rem;
+    color: #666;
+    margin: 4px 0 0;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1 class="admin-title">Admin Dashboard</h1>
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin.index') }}" class="active">Dashboard</a>
+            <a href="{{ url_for('admin.users') }}">Users</a>
+            <a href="{{ url_for('admin.reports') }}">Reports</a>
+            <a href="{{ url_for('admin.generate_report') }}">Generate Report</a>
+            <a href="{{ url_for('admin.contacts') }}">Contacts</a>
+            <a href="{{ url_for('admin.settings') }}">Settings</a>
+        </nav>
+    </div>
+
+    {% if maintenance_mode %}
+    <div class="alert alert-warning">
+        <i class="fas fa-tools"></i> Maintenance mode is currently active. Only administrators can access the site.
+    </div>
+    {% endif %}
+
+    {% if reports_count > 0 %}
+    <div class="alert alert-info">
+        <i class="fas fa-flag"></i> There are {{ reports_count }} new reports that need attention.
+    </div>
+    {% endif %}
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon users">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value">{{ stats.total_users }}</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon posts">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Total Posts</div>
+                <div class="stat-value">{{ stats.total_posts }}</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon comments">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Total Comments</div>
+                <div class="stat-value">{{ stats.total_comments }}</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon suggestions">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-label">Total Suggestions</div>
+                <div class="stat-value">{{ stats.total_suggestions }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-actions">
+        <a href="{{ url_for('admin.users') }}" class="action-card">
+            <div class="action-header">
+                <div class="action-icon">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <h2 class="action-title">Manage Users</h2>
+            </div>
+            <p class="action-description">View and manage user accounts, roles, and permissions.</p>
+        </a>
+
+        <a href="{{ url_for('admin.reports') }}" class="action-card">
+            <div class="action-header">
+                <div class="action-icon">
+                    <i class="fas fa-flag"></i>
+                </div>
+                <h2 class="action-title">Handle Reports</h2>
+            </div>
+            <p class="action-description">Review and take action on reported content.</p>
+        </a>
+
+        <a href="{{ url_for('admin.generate_report') }}" class="action-card">
+            <div class="action-header">
+                <div class="action-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h2 class="action-title">Generate Reports</h2>
+            </div>
+            <p class="action-description">Create and send custom reports to contacts.</p>
+        </a>
+
+        <a href="{{ url_for('admin.contacts') }}" class="action-card">
+            <div class="action-header">
+                <div class="action-icon">
+                    <i class="fas fa-address-book"></i>
+                </div>
+                <h2 class="action-title">Manage Contacts</h2>
+            </div>
+            <p class="action-description">Manage report recipients and contacts.</p>
+        </a>
+
+        <a href="{{ url_for('admin.settings') }}" class="action-card">
+            <div class="action-header">
+                <div class="action-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <h2 class="action-title">System Settings</h2>
+            </div>
+            <p class="action-description">Configure site settings and maintenance mode.</p>
+        </a>
+    </div>
+
+    <div class="recent-activity">
+        <div class="activity-header">
+            <h2 class="activity-title">Recent Activity</h2>
+        </div>
+        <ul class="activity-list">
+            {% for activity in recent_activity %}
+            <li class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-{{ activity.icon }}"></i>
+                </div>
+                <div class="activity-content">
+                    <p class="activity-text">{{ activity.text }}</p>
+                    <p class="activity-meta">{{ activity.timestamp|timeago }}</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %} 

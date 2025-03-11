@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-box">
+        <h1>Create an Account</h1>
+        <form method="POST" action="{{ url_for('auth.signup') }}" class="auth-form">
+            {{ form.csrf_token }}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                {{ form.username(class="form-control", id="username", placeholder="Choose a username") }}
+                {% if form.username.errors %}
+                    {% for error in form.username.errors %}
+                        <div class="validation-message error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                <div class="validation-message" id="username-validation"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                {{ form.email(class="form-control", id="email", placeholder="Enter your email") }}
+                {% if form.email.errors %}
+                    {% for error in form.email.errors %}
+                        <div class="validation-message error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                <div class="validation-message" id="email-validation"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                {{ form.password(class="form-control", id="password", placeholder="Create a password") }}
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <div class="validation-message error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                <div class="password-strength" id="password-strength"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                {{ form.confirm_password(class="form-control", id="confirm_password", placeholder="Confirm your password") }}
+                {% if form.confirm_password.errors %}
+                    {% for error in form.confirm_password.errors %}
+                        <div class="validation-message error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+                <div class="validation-message" id="password-match"></div>
+            </div>
+            
+            <div class="form-group">
+                {{ form.submit(class="btn-primary btn-block") }}
+            </div>
+            
+            <div class="auth-links">
+                <a href="{{ url_for('auth.login') }}">Already have an account? Login</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    
+    // Username validation
+    let usernameTimeout;
+    usernameInput.addEventListener('input', function() {
+        clearTimeout(usernameTimeout);
+        const username = this.value;
+        const validationDiv = document.getElementById('username-validation');
+        
+        if (!username) {
+            validationDiv.textContent = '';
+            return;
+        }
+        
+        if (!username.match(/^[a-zA-Z0-9_]{3,20}$/)) {
+            validationDiv.textContent = 'Username must be 3-20 characters and contain only letters, numbers, and underscores';
+            validationDiv.className = 'validation-message error';
+            return;
+        }
+        
+        usernameTimeout = setTimeout(() => {
+            fetch('/check-username?username=' + encodeURIComponent(username))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.available) {
+                        validationDiv.textContent = 'Username is available';
+                        validationDiv.className = 'validation-message success';
+                    } else {
+                        validationDiv.textContent = 'Username is already taken';
+                        validationDiv.className = 'validation-message error';
+                    }
+                });
+        }, 500);
+    });
+    
+    // Password strength
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        const strengthDiv = document.getElementById('password-strength');
+        let strength = 0;
+        
+        if (password.length >= 8) strength++;
+        if (password.match(/[a-z]/)) strength++;
+        if (password.match(/[A-Z]/)) strength++;
+        if (password.match(/[0-9]/)) strength++;
+        
+        switch(strength) {
+            case 0:
+            case 1:
+                strengthDiv.textContent = 'Weak';
+                strengthDiv.className = 'password-strength weak';
+                break;
+            case 2:
+            case 3:
+                strengthDiv.textContent = 'Medium';
+                strengthDiv.className = 'password-strength medium';
+                break;
+            case 4:
+                strengthDiv.textContent = 'Strong';
+                strengthDiv.className = 'password-strength strong';
+                break;
+        }
+    });
+    
+    // Password match validation
+    function checkPasswordMatch() {
+        const matchDiv = document.getElementById('password-match');
+        if (confirmPasswordInput.value && passwordInput.value !== confirmPasswordInput.value) {
+            matchDiv.textContent = 'Passwords do not match';
+            matchDiv.className = 'validation-message error';
+        } else {
+            matchDiv.textContent = '';
+        }
+    }
+    
+    passwordInput.addEventListener('input', checkPasswordMatch);
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+});
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 200px);
+    padding: 20px;
+}
+
+.auth-box {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-box h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.auth-form .form-group {
+    margin-bottom: 20px;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.auth-form input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.validation-message {
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.validation-message.error {
+    color: #dc3545;
+}
+
+.validation-message.success {
+    color: #28a745;
+}
+
+.password-strength {
+    margin-top: 5px;
+    font-size: 14px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.password-strength.weak {
+    background-color: #dc3545;
+    color: white;
+}
+
+.password-strength.medium {
+    background-color: #ffc107;
+    color: black;
+}
+
+.password-strength.strong {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-block {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+}
+
+.auth-links {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.auth-links a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+</style>
+{% endblock %} 

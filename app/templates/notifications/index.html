@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block extra_css %}
+<style>
+.notifications-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.notifications-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.notification-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.notification-item:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.notification-item.unread {
+    background: #f8fafc;
+    border-left: 4px solid #3b82f6;
+}
+
+.notification-content {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.notification-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.notification-actions button {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.25rem;
+    transition: color 0.2s;
+}
+
+.notification-actions button:hover {
+    color: #1e293b;
+}
+
+.notification-date {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.notifications-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #64748b;
+}
+
+.notifications-empty i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.notifications-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.notifications-pagination button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.25rem;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.notifications-pagination button:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.notifications-pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .notifications-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .notification-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notifications-container">
+    <div class="notifications-header">
+        <h1 class="text-2xl font-bold">Notifications</h1>
+        <div class="notifications-actions">
+            <button id="markAllRead" class="btn btn-secondary">
+                Mark All as Read
+            </button>
+            <label class="flex items-center">
+                <input type="checkbox" id="showRead" class="mr-2">
+                Show Read
+            </label>
+        </div>
+    </div>
+
+    <div id="notificationsList"></div>
+
+    <div class="notifications-pagination">
+        <button id="prevPage" disabled>&larr; Previous</button>
+        <span id="pageInfo"></span>
+        <button id="nextPage" disabled>Next &rarr;</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentPage = 1;
+let totalPages = 1;
+let showRead = false;
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function renderNotification(notification) {
+    return `
+        <div class="notification-item ${notification.is_read ? '' : 'unread'}" data-id="${notification._id}">
+            <div class="notification-content">${notification.content}</div>
+            <div class="notification-meta">
+                <span class="notification-date">${formatDate(notification.created_at)}</span>
+                <div class="notification-actions">
+                    ${!notification.is_read ? `
+                        <button onclick="markRead('${notification._id}')" title="Mark as read">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    ` : ''}
+                    <button onclick="deleteNotification('${notification._id}')" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function loadNotifications() {
+    try {
+        const response = await fetch(`/notifications/data?page=${currentPage}&include_read=${showRead}`);
+        const data = await response.json();
+        
+        const list = document.getElementById('notificationsList');
+        
+        if (data.notifications.length === 0) {
+            list.innerHTML = `
+                <div class="notifications-empty">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No notifications to display</p>
+                </div>
+            `;
+        } else {
+            list.innerHTML = data.notifications.map(renderNotification).join('');
+        }
+        
+        totalPages = data.pages;
+        updatePagination();
+        
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+    }
+}
+
+function updatePagination() {
+    document.getElementById('prevPage').disabled = currentPage === 1;
+    document.getElementById('nextPage').disabled = currentPage === totalPages;
+    document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+}
+
+async function markRead(id) {
+    try {
+        await fetch(`/notifications/${id}/read`, { method: 'POST' });
+        loadNotifications();
+        updateUnreadCount();
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+    }
+}
+
+async function markAllRead() {
+    try {
+        await fetch('/notifications/mark-all-read', { method: 'POST' });
+        loadNotifications();
+        updateUnreadCount();
+    } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+    }
+}
+
+async function deleteNotification(id) {
+    if (!confirm('Are you sure you want to delete this notification?')) return;
+    
+    try {
+        await fetch(`/notifications/${id}`, { method: 'DELETE' });
+        loadNotifications();
+        updateUnreadCount();
+    } catch (error) {
+        console.error('Error deleting notification:', error);
+    }
+}
+
+async function updateUnreadCount() {
+    try {
+        const response = await fetch('/notifications/unread');
+        const data = await response.json();
+        // Update the count in the navbar if it exists
+        const countElement = document.getElementById('unreadNotificationsCount');
+        if (countElement) {
+            countElement.textContent = data.count;
+            countElement.style.display = data.count > 0 ? 'block' : 'none';
+        }
+    } catch (error) {
+        console.error('Error updating unread count:', error);
+    }
+}
+
+document.getElementById('prevPage').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        loadNotifications();
+    }
+});
+
+document.getElementById('nextPage').addEventListener('click', () => {
+    if (currentPage < totalPages) {
+        currentPage++;
+        loadNotifications();
+    }
+});
+
+document.getElementById('markAllRead').addEventListener('click', markAllRead);
+
+document.getElementById('showRead').addEventListener('change', (e) => {
+    showRead = e.target.checked;
+    currentPage = 1;
+    loadNotifications();
+});
+
+// Initial load
+loadNotifications();
+updateUnreadCount();
+
+// Set up periodic updates
+setInterval(updateUnreadCount, 60000); // Update count every minute
+</script>
+{% endblock %} 

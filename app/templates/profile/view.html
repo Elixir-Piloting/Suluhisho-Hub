@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+.profile-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.profile-header {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-username {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.profile-fullname {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.profile-content {
+    margin-top: 2rem;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+.profile-name {
+    font-size: 1.75rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.profile-meta {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.profile-bio {
+    color: #444;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.post-list,
+.suggestion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.post-card,
+.suggestion-card {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    transition: transform 0.2s;
+}
+
+.post-card:hover,
+.suggestion-card:hover {
+    transform: translateY(-2px);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+.card-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.card-title a:hover {
+    color: #007bff;
+}
+
+.card-meta {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: 10px;
+}
+
+.status-resolved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-unresolved {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.post-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.post-header {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.post-title {
+    font-size: 1.2rem;
+    margin: 0;
+    color: #333;
+}
+
+.post-title a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.post-title a:hover {
+    color: #007bff;
+}
+
+.post-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: 8px;
+    text-transform: capitalize;
+}
+
+.resolved .post-status {
+    background: #d4edda;
+    color: #155724;
+}
+
+.unresolved .post-status {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.post-meta {
+    padding: 0.75rem 1rem;
+    color: #666;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #eee;
+}
+
+.post-preview {
+    padding: 1rem;
+    color: #444;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.post-stats {
+    padding: 0.75rem 1rem;
+    display: flex;
+    gap: 1.5rem;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.post-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.post-stats .stat i {
+    color: #007bff;
+    width: 16px;
+    text-align: center;
+}
+
+.post-stats .stat.upvotes i {
+    color: #28a745;
+}
+
+.post-stats .stat.comments i {
+    color: #17a2b8;
+}
+
+.post-stats .stat.suggestions i {
+    color: #ffc107;
+}
+
+.post-stats .stat.location i {
+    color: #dc3545;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state h3 {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #666;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .profile-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .posts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="profile-header">
+        <img src="{{ user.profile_picture if user.profile_picture else url_for('static', filename='images/default-avatar.png') }}" 
+             alt="{{ user.username }}'s avatar"
+             class="profile-avatar">
+        <h1 class="profile-name">{{ user.username }}</h1>
+        {% if user.full_name %}
+            <div class="profile-fullname">{{ user.full_name }}</div>
+        {% endif %}
+        <div class="profile-meta">
+            Member since {{ join_date|timeago }}
+        </div>
+        {% if user.bio %}
+            <div class="profile-bio">{{ user.bio }}</div>
+        {% endif %}
+        
+        <div class="profile-stats">
+            <div class="stat-item">
+                <div class="stat-value">{{ post_count }}</div>
+                <div class="stat-label">Posts</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ suggestion_count }}</div>
+                <div class="stat-label">Suggestions</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ join_date.strftime('%b %Y') }}</div>
+                <div class="stat-label">Joined</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <h2 class="section-title">Posts</h2>
+        <div class="posts-grid">
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="post-card {% if post.status == 'resolved' %}resolved{% else %}unresolved{% endif %}">
+                        <div class="post-header">
+                            <h2 class="post-title">
+                                <a href="{{ url_for('posts.view', post_id=post._id) }}">{{ post.title }}</a>
+                            </h2>
+                            <span class="post-status">{{ post.status }}</span>
+                        </div>
+                        
+                        <div class="post-meta">
+                            Posted {{ post.created_at|timeago }}
+                            {% if post.location %}
+                                • {{ post.location.coordinates[1]|round(4) }}, 
+                                  {{ post.location.coordinates[0]|round(4) }}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="post-preview">
+                            {{ post.description[:200] }}{% if post.description|length > 200 %}...{% endif %}
+                        </div>
+                        
+                        <div class="post-stats">
+                            <div class="stat upvotes">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>{{ post.upvotes|default([])|length }}</span>
+                            </div>
+                            <div class="stat comments">
+                                <i class="fas fa-comments"></i>
+                                <span>{{ post.comment_count|default(0) }}</span>
+                            </div>
+                            <div class="stat suggestions">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>{{ post.suggestion_count|default(0) }}</span>
+                            </div>
+                            {% if post.location %}
+                                <div class="stat location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h3>No posts yet</h3>
+                    <p>This user hasn't created any posts.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

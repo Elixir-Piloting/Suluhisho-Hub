@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Email - Suluhisho Hub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .footer {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>Suluhisho Hub</h1>
+        </div>
+        
+        <h2>Welcome to Suluhisho Hub!</h2>
+        
+        <p>Dear {{ user.username }},</p>
+        
+        <p>Thank you for signing up. To complete your registration and verify your email address, please click the button below:</p>
+        
+        <a href="{{ verify_url }}" class="button">Verify Email Address</a>
+        
+        <p>Or copy and paste this link into your browser:</p>
+        <p>{{ verify_url }}</p>
+        
+        <div class="footer">
+            <p>If you did not create an account, please ignore this email.</p>
+            <p>Best regards,<br>The Suluhisho Hub Team</p>
+        </div>
+    </div>
+</body>
+</html> 

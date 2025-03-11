@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .post {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .post-title {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .suggestion {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+        }
+        .badge {
+            background-color: #007bff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Report: {{ report.category or 'All Categories' }} Posts</h2>
+            <p>Period: {{ report.start_date|datetime }} to {{ report.end_date|datetime }}</p>
+        </div>
+        
+        {% for post in report.posts %}
+            <div class="post">
+                <h3>
+                    <a href="{{ url_for('posts.view', post_id=post._id, _external=True) }}" class="post-title">
+                        {{ post.title }}
+                    </a>
+                </h3>
+                <p>{{ post.description }}</p>
+                <div style="color: #666; font-size: 0.9em;">
+                    Category: {{ post.category }} | Status: {{ post.status }} | Created: {{ post.created_at|datetime }}
+                </div>
+                
+                {% if post.top_suggestions %}
+                    <h4 style="margin-top: 15px;">Top Suggestions:</h4>
+                    {% for suggestion in post.top_suggestions %}
+                        <div class="suggestion">
+                            <span class="badge">{{ suggestion.upvotes|length }}</span>
+                            {{ suggestion.content }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% else %}
+            <p>No posts found for the selected criteria.</p>
+        {% endfor %}
+    </div>
+</body>
+</html> 

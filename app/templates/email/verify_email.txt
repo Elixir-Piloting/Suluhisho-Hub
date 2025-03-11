@@ -1,0 +1,13 @@
+Dear {{ user.username }},
+
+Welcome to Suluhisho Hub! To verify your email address, please click on the following link:
+
+{{ verify_url }}
+
+If you did not create an account, please ignore this email.
+
+Best regards,
+The Suluhisho Hub Team
+
+---
+This email was sent by Suluhisho Hub. Please do not reply to this email. 

@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Create Post{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+.create-post {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.form-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-item .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #dc3545;
+}
+
+#map-container {
+    height: 300px;
+    border-radius: 4px;
+    margin-top: 10px;
+}
+
+.location-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.location-preview {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    display: none;
+}
+
+.location-preview.active {
+    display: block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-post">
+    <h1>Create New Post</h1>
+    
+    <form method="POST" enctype="multipart/form-data" id="post-form">
+        <div class="form-section">
+            <div class="form-group">
+                <label for="title">Title *</label>
+                <input type="text" id="title" name="title" required
+                       placeholder="Enter a descriptive title">
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <select id="category" name="category" required>
+                    <option value="">Select a category</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" rows="6" required
+                         placeholder="Describe the issue in detail"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="form-group">
+                <label for="images">Images</label>
+                <input type="file" id="images" name="images" multiple
+                       accept=".png,.jpg,.jpeg,.gif">
+                <small class="text-muted">You can upload up to 5 images</small>
+                <div class="image-preview" id="image-preview"></div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <div class="form-group">
+                <label>Location (Optional)</label>
+                <div id="map-container"></div>
+                <input type="hidden" id="location" name="location">
+                
+                <div class="location-controls">
+                    <button type="button" class="btn-secondary" id="use-current-location">
+                        Use Current Location
+                    </button>
+                    <button type="button" class="btn-secondary" id="clear-location">
+                        Clear Location
+                    </button>
+                </div>
+                
+                <div class="location-preview" id="location-preview">
+                    Selected location: <span id="location-text"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" class="btn-primary">Create Post</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Image preview handling
+    const imageInput = document.getElementById('images');
+    const previewContainer = document.getElementById('image-preview');
+    const maxImages = 5;
+    
+    imageInput.addEventListener('change', function() {
+        if (this.files.length > maxImages) {
+            alert(`You can only upload up to ${maxImages} images.`);
+            this.value = '';
+            return;
+        }
+        
+        previewContainer.innerHTML = '';
+        Array.from(this.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `
+                    <img src="${e.target.result}">
+                    <button type="button" class="remove-image">&times;</button>
+                `;
+                
+                div.querySelector('.remove-image').onclick = function() {
+                    div.remove();
+                    // Reset file input if all previews are removed
+                    if (previewContainer.children.length === 0) {
+                        imageInput.value = '';
+                    }
+                };
+                
+                previewContainer.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+    
+    // Map handling
+    let map = L.map('map-container').setView([0, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    let marker;
+    const locationInput = document.getElementById('location');
+    const locationPreview = document.getElementById('location-preview');
+    const locationText = document.getElementById('location-text');
+    
+    function updateLocation(lat, lng) {
+        if (marker) {
+            map.removeLayer(marker);
+        }
+        marker = L.marker([lat, lng]).addTo(map);
+        map.setView([lat, lng], 15);
+        
+        locationInput.value = JSON.stringify({lat, lng});
+        locationText.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        locationPreview.classList.add('active');
+    }
+    
+    // Map click handler
+    map.on('click', function(e) {
+        updateLocation(e.latlng.lat, e.latlng.lng);
+    });
+    
+    // Use current location
+    document.getElementById('use-current-location').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    updateLocation(position.coords.latitude, position.coords.longitude);
+                },
+                error => {
+                    alert('Error getting location: ' + error.message);
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by your browser.');
+        }
+    });
+    
+    // Clear location
+    document.getElementById('clear-location').addEventListener('click', function() {
+        if (marker) {
+            map.removeLayer(marker);
+            marker = null;
+        }
+        locationInput.value = '';
+        locationPreview.classList.remove('active');
+        map.setView([0, 0], 2);
+    });
+    
+    // Form validation
+    document.getElementById('post-form').addEventListener('submit', function(e) {
+        const title = document.getElementById('title').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const category = document.getElementById('category').value;
+        
+        if (!title || !description || !category) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+        }
+    });
+});
+</script>
+{% endblock %} 

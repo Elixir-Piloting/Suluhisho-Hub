@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Site Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+.admin-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.settings-form {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group small {
+    display: block;
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="number"] {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 1rem;
+    min-height: 100px;
+    resize: vertical;
+}
+
+.toggle-group {
+    margin-top: 10px;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #007bff;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.btn-save {
+    background: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+}
+
+.btn-save:hover {
+    background: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .settings-form {
+        padding: 20px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h1 class="mb-4">Site Settings</h1>
+    
+    <form method="POST" class="settings-form">
+        <div class="form-section">
+            <h2 class="section-title">General Settings</h2>
+            
+            <div class="form-group">
+                <label for="site_name">Site Name</label>
+                <input type="text" id="site_name" name="site_name"
+                       value="{{ settings.site_name or 'Suluhisho Hub' }}" required>
+                <small>The name of your site that appears in the header and title</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="site_description">Site Description</label>
+                <textarea id="site_description" name="site_description">{{ settings.site_description or '' }}</textarea>
+                <small>A brief description of your site that appears in search results</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="contact_email">Contact Email</label>
+                <input type="email" id="contact_email" name="contact_email"
+                       value="{{ settings.contact_email or '' }}" required>
+                <small>The email address used for system notifications and contact forms</small>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h2 class="section-title">Upload Settings</h2>
+            
+            <div class="form-group">
+                <label for="max_file_size">Maximum File Size (MB)</label>
+                <input type="number" id="max_file_size" name="max_file_size"
+                       value="{{ settings.max_file_size or 5 }}" min="1" max="50" required>
+                <small>Maximum allowed file size for uploads in megabytes</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="allowed_file_types">Allowed File Types</label>
+                <input type="text" id="allowed_file_types" name="allowed_file_types"
+                       value="{{ settings.allowed_file_types|join(',') if settings.allowed_file_types else 'jpg,jpeg,png,gif' }}">
+                <small>Comma-separated list of allowed file extensions (e.g., jpg,jpeg,png,gif)</small>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h2 class="section-title">Registration Settings</h2>
+            
+            <div class="form-group">
+                <div class="toggle-group">
+                    <label class="toggle-label">
+                        <span class="toggle-switch">
+                            <input type="checkbox" name="enable_registration"
+                                   {% if settings.enable_registration|default(true) %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </span>
+                        Enable User Registration
+                    </label>
+                    <small>Allow new users to register on the site</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="toggle-group">
+                    <label class="toggle-label">
+                        <span class="toggle-switch">
+                            <input type="checkbox" name="require_email_verification"
+                                   {% if settings.require_email_verification|default(true) %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </span>
+                        Require Email Verification
+                    </label>
+                    <small>Require users to verify their email address before they can post</small>
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn-save">Save Settings</button>
+    </form>
+</div>
+{% endblock %} 

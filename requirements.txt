@@ -1,0 +1,12 @@
+Flask==3.0.2
+Flask-Login==0.6.3
+Flask-Mail==0.9.1
+Flask-WTF==1.2.1
+pymongo==4.6.2
+python-dotenv==1.0.1
+bcrypt==4.1.2
+email-validator==2.1.1
+python-slugify==8.0.4
+WTForms==3.1.2
+geopy==2.4.1
+Pillow==11.1.0 

@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+.admin-container {
+    padding: 20px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-title {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 15px;
+}
+
+.admin-nav a {
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.admin-nav a:hover {
+    background: #f8f9fa;
+    color: #007bff;
+}
+
+.admin-nav a.active {
+    background: #007bff;
+    color: white;
+}
+
+.users-table {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.users-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
+
+.users-table tr:hover {
+    background: #f8f9fa;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.user-email {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.user-status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-suspended {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.user-role {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.role-admin {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.role-moderator {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.role-user {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-action {
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-edit {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.btn-edit:hover {
+    background: #dee2e6;
+}
+
+.btn-suspend {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.btn-suspend:hover {
+    background: #f5c6cb;
+}
+
+.btn-activate {
+    background: #d4edda;
+    color: #155724;
+}
+
+.btn-activate:hover {
+    background: #c3e6cb;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-page {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #666;
+    text-decoration: none;
+}
+
+.btn-page.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1 class="admin-title">Manage Users</h1>
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin.index') }}">Dashboard</a>
+            <a href="{{ url_for('admin.users') }}" class="active">Users</a>
+            <a href="{{ url_for('admin.reports') }}">Reports</a>
+            <a href="{{ url_for('admin.settings') }}">Settings</a>
+        </nav>
+    </div>
+
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>
+                    <div class="user-info">
+                        <img src="{{ user.profile_picture or url_for('static', filename='images/default-avatar.png') }}" 
+                             alt="{{ user.username }}" class="user-avatar">
+                        <div>
+                            <div class="user-name">{{ user.username }}</div>
+                            <div class="user-email">{{ user.email }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <form action="{{ url_for('admin.edit_user_role', user_id=user._id) }}" method="POST" class="d-inline">
+                        <select name="role" class="form-select form-select-sm" onchange="this.form.submit()" {% if user._id == current_user._id %}disabled{% endif %}>
+                            <option value="user" {% if not user.is_admin and not user.is_moderator %}selected{% endif %}>User</option>
+                            <option value="moderator" {% if user.is_moderator and not user.is_admin %}selected{% endif %}>Moderator</option>
+                            <option value="admin" {% if user.is_admin %}selected{% endif %}>Admin</option>
+                        </select>
+                    </form>
+                </td>
+                <td>
+                    <span class="user-status status-{{ user.status }}">
+                        {{ user.status|title }}
+                    </span>
+                </td>
+                <td>{{ user.created_at|timeago }}</td>
+                <td>
+                    <div class="user-actions">
+                        <a href="#" class="btn-action btn-edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        {% if user.status == 'active' %}
+                            <form action="{{ url_for('admin.toggle_user_status', user_id=user._id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn-action btn-suspend">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('admin.toggle_user_status', user_id=user._id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn-action btn-activate">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if total > per_page %}
+        <div class="pagination">
+            {% set pages = (total / per_page)|round(0, 'ceil')|int %}
+            {% if page > 1 %}
+                <a href="{{ url_for('admin.users', page=page-1) }}" class="btn-page">&laquo; Previous</a>
+            {% endif %}
+            
+            {% for p in range(max(1, page-2), min(pages+1, page+3)) %}
+                <a href="{{ url_for('admin.users', page=p) }}" 
+                   class="btn-page {% if p == page %}active{% endif %}">{{ p }}</a>
+            {% endfor %}
+            
+            {% if page < pages %}
+                <a href="{{ url_for('admin.users', page=page+1) }}" class="btn-page">Next &raquo;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+.home-container {
+    padding: 20px 0;
+}
+
+.filters {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.filter-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-options select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 150px;
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.post-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.2s;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+}
+
+.post-card.resolved {
+    border-left: 4px solid #28a745;
+}
+
+.post-card.unresolved {
+    border-left: 4px solid #ffc107;
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.post-title {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.post-title a {
+    color: #333;
+    text-decoration: none;
+}
+
+.post-title a:hover {
+    color: #007bff;
+}
+
+.post-status {
+    font-size: 0.8rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.resolved .post-status {
+    background: #d4edda;
+    color: #155724;
+}
+
+.unresolved .post-status {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.post-meta {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.post-meta a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.post-preview {
+    color: #555;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.post-stats {
+    padding: 0.75rem 1rem;
+    display: flex;
+    gap: 1.5rem;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.post-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.post-stats .stat i {
+    width: 16px;
+    text-align: center;
+}
+
+.post-stats .stat.upvotes i {
+    color: #28a745;
+}
+
+.post-stats .stat.comments i {
+    color: #17a2b8;
+}
+
+.post-stats .stat.suggestions i {
+    color: #ffc107;
+}
+
+.post-stats .stat.location i {
+    color: #dc3545;
+}
+
+.no-posts {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.btn-page {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #666;
+    text-decoration: none;
+}
+
+.btn-page.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+@media (max-width: 768px) {
+    .filter-options {
+        flex-direction: column;
+    }
+    
+    .posts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <div class="filters">
+        <form method="GET" action="{{ url_for('main.index') }}" class="search-form">
+            <div class="search-box">
+                <input type="text" name="search" value="{{ search or '' }}" 
+                       placeholder="Search issues...">
+                <button type="submit" class="btn-primary">Search</button>
+            </div>
+            
+            <div class="filter-options">
+                <select name="category">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>
+                            {{ cat }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <select name="status">
+                    <option value="">All Status</option>
+                    <option value="unresolved" {% if status == 'unresolved' %}selected{% endif %}>
+                        Unresolved
+                    </option>
+                    <option value="resolved" {% if status == 'resolved' %}selected{% endif %}>
+                        Resolved
+                    </option>
+                </select>
+                
+                <button type="submit" class="btn-primary">Apply Filters</button>
+                {% if search or category or status %}
+                    <a href="{{ url_for('main.index') }}" class="btn-secondary">Clear Filters</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="posts-grid">
+        {% for post in posts %}
+            <div class="post-card {% if post['status'] == 'resolved' %}resolved{% else %}unresolved{% endif %}">
+                <div class="post-header">
+                    <h2 class="post-title">
+                        <a href="{{ url_for('posts.view', post_id=post['_id']) }}">{{ post['title'] }}</a>
+                    </h2>
+                    <span class="post-status">{{ post['status'] }}</span>
+                </div>
+                
+                <div class="post-meta">
+                    <span class="post-author">
+                        Posted by <a href="{{ url_for('main.profile', username=post['author']['username']) }}">
+                            {{ post['author']['username'] }}
+                        </a>
+                    </span>
+                    <span class="post-date">{{ post['created_at']|timeago }}</span>
+                </div>
+                
+                <div class="post-preview">
+                    {{ post['description'][:200] }}{% if post['description']|length > 200 %}...{% endif %}
+                </div>
+                
+                <div class="post-stats">
+                    <div class="stat upvotes">
+                        <i class="fas fa-thumbs-up"></i>
+                        <span>{{ post['upvotes']|length }}</span>
+                    </div>
+                    <div class="stat comments">
+                        <i class="fas fa-comments"></i>
+                        <span>{{ post['comment_count'] }}</span>
+                    </div>
+                    <div class="stat suggestions">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>{{ post['suggestion_count'] }}</span>
+                    </div>
+                    {% if post['location'] %}
+                        <div class="stat location">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="no-posts">
+                <h2>No posts found</h2>
+                <p>Try adjusting your search or filters, or be the first to create a post!</p>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('posts.create') }}" class="btn-primary">Create Post</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn-primary">Login to Create Post</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if total > per_page %}
+        <div class="pagination">
+            {% set pages = (total / per_page)|round(0, 'ceil')|int %}
+            {% if page > 1 %}
+                <a href="{{ url_for('main.index', page=page-1, search=search, category=category, status=status) }}" 
+                   class="btn-secondary">&laquo; Previous</a>
+            {% endif %}
+            
+            {% for p in range(max(1, page-2), min(pages+1, page+3)) %}
+                <a href="{{ url_for('main.index', page=p, search=search, category=category, status=status) }}" 
+                   class="btn-page {% if p == page %}active{% endif %}">{{ p }}</a>
+            {% endfor %}
+            
+            {% if page < pages %}
+                <a href="{{ url_for('main.index', page=page+1, search=search, category=category, status=status) }}" 
+                   class="btn-secondary">Next &raquo;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+
+{% block title %}View Report{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+.admin-container {
+    padding: 20px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.admin-title {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 15px;
+}
+
+.admin-nav a {
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.admin-nav a:hover {
+    background: #f8f9fa;
+    color: #007bff;
+}
+
+.admin-nav a.active {
+    background: #007bff;
+    color: white;
+}
+
+.report-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.report-title {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0;
+}
+
+.report-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.report-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.detail-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+}
+
+.detail-label {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.detail-value {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.posts-list {
+    margin-top: 20px;
+}
+
+.post-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+}
+
+.post-title {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0 0 10px 0;
+}
+
+.post-meta {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.post-description {
+    color: #444;
+    margin-bottom: 15px;
+}
+
+.suggestions-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.suggestions-title {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.suggestion-item {
+    background: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    border: 1px solid #eee;
+}
+
+.suggestion-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.suggestion-content {
+    color: #333;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background: white;
+    width: 90%;
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+}
+
+.contacts-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.contact-item:last-child {
+    border-bottom: none;
+}
+
+.contact-checkbox {
+    margin-right: 10px;
+}
+
+.contact-info {
+    flex: 1;
+}
+
+.contact-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.contact-email {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.contact-category {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.modal-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1 class="admin-title">Report Details</h1>
+        <nav class="admin-nav">
+            <a href="{{ url_for('admin.index') }}">Dashboard</a>
+            <a href="{{ url_for('admin.users') }}">Users</a>
+            <a href="{{ url_for('admin.reports') }}">Reports</a>
+            <a href="{{ url_for('admin.generate_report') }}">Generate Report</a>
+            <a href="{{ url_for('admin.contacts') }}">Contacts</a>
+            <a href="{{ url_for('admin.settings') }}">Settings</a>
+        </nav>
+    </div>
+
+    <div class="report-section">
+        <div class="report-header">
+            <h2 class="report-title">Report Details</h2>
+            <div class="report-actions">
+                <a href="{{ url_for('admin.generate_report') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Generate New Report
+                </a>
+                <button class="btn btn-success" onclick="showSendModal()">
+                    <i class="fas fa-paper-plane"></i> Send Report
+                </button>
+                <a href="{{ url_for('admin.download_report', report_id=report._id) }}" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Download
+                </a>
+            </div>
+        </div>
+
+        <div class="report-details">
+            <div class="detail-item">
+                <div class="detail-label">Period</div>
+                <div class="detail-value">{{ report.start_date|datetime }} to {{ report.end_date|datetime }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Category</div>
+                <div class="detail-value">{{ report.category or 'All Categories' }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">{{ report.status or 'All Statuses' }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Generated</div>
+                <div class="detail-value">{{ report.generated_at|datetime }}</div>
+            </div>
+        </div>
+
+        <div class="posts-list">
+            <h3>Posts</h3>
+            {% if report.posts %}
+                {% for post in report.posts %}
+                    <div class="post-card">
+                        <h4 class="post-title">{{ post.title }}</h4>
+                        <div class="post-meta">
+                            <span>Category: {{ post.category }}</span>
+                            <span>Status: {{ post.status }}</span>
+                            <span>Created: {{ post.created_at|datetime }}</span>
+                        </div>
+                        <p class="post-description">{{ post.description }}</p>
+                        
+                        {% if post.top_suggestions %}
+                            <div class="suggestions-section">
+                                <h5 class="suggestions-title">Top Suggestions</h5>
+                                {% for suggestion in post.top_suggestions %}
+                                    <div class="suggestion-item">
+                                        <div class="suggestion-meta">
+                                            <span>Upvotes: {{ suggestion.upvotes|length }}</span>
+                                            <span>By: {{ suggestion.author.username }}</span>
+                                        </div>
+                                        <div class="suggestion-content">{{ suggestion.content }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No posts found for the selected criteria.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Send Report Modal -->
+<div id="sendModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Send Report to Contacts</h3>
+            <button class="close-modal" onclick="hideSendModal()">&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('admin.send_report', report_id=report._id) }}">
+            <div class="contacts-list">
+                {% for contact in contacts %}
+                    <div class="contact-item">
+                        <input type="checkbox" name="contact_ids" value="{{ contact._id }}" class="contact-checkbox">
+                        <div class="contact-info">
+                            <div class="contact-name">{{ contact.name }}</div>
+                            <div class="contact-email">{{ contact.email }}</div>
+                            <div class="contact-category">{{ contact.category }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideSendModal()">Cancel</button>
+                <button type="submit" class="btn btn-success">Send Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showSendModal() {
+    document.getElementById('sendModal').style.display = 'block';
+}
+
+function hideSendModal() {
+    document.getElementById('sendModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('sendModal');
+    if (event.target == modal) {
+        hideSendModal();
+    }
+}
+</script>
+{% endblock %} 

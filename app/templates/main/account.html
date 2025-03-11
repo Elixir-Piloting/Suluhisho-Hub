@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="settings-section">
+        <h2 class="section-title">Profile Information</h2>
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('main.update_profile') }}">
+            {{ form.csrf_token if form }}
+            <div class="form-group">
+                <label>Profile Picture</label>
+                <div class="profile-picture-container">
+                    <img src="{{ current_user.profile_picture or url_for('static', filename='images/default-avatar.png') }}"
+                         alt="Current profile picture" class="current-picture">
+                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" value="{{ current_user.username }}" disabled>
+                <small class="text-muted">Username cannot be changed</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+            </div>
+            
+            <button type="submit" class="btn-primary">Save Changes</button>
+        </form>
+    </div>
+
+    <div class="settings-section">
+        <h2 class="section-title">Change Password</h2>
+        <form method="POST" action="{{ url_for('main.change_password') }}">
+            {{ form.csrf_token if form }}
+            <div class="form-group">
+                <label for="current_password">Current Password</label>
+                <input type="password" id="current_password" name="current_password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="new_password">New Password</label>
+                <input type="password" id="new_password" name="new_password" required>
+                <div class="password-strength"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+            </div>
+            
+            <button type="submit" class="btn-primary">Change Password</button>
+        </form>
+    </div>
+
+    <div class="settings-section">
+        <h2 class="section-title">Email Preferences</h2>
+        <form method="POST" action="{{ url_for('main.update_preferences') }}">
+            {{ form.csrf_token if form }}
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="email_notifications" 
+                           {% if current_user.email_notifications %}checked{% endif %}>
+                    Receive email notifications
+                </label>
+                <small class="text-muted">Get notified about comments and updates on your posts</small>
+            </div>
+            
+            <button type="submit" class="btn-primary">Save Preferences</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.settings-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.settings-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.text-muted {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.profile-picture-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.current-picture {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.password-strength {
+    height: 4px;
+    background: #eee;
+    margin-top: 0.5rem;
+    border-radius: 2px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password strength indicator
+    const passwordInput = document.getElementById('new_password');
+    const strengthIndicator = document.querySelector('.password-strength');
+    
+    if (passwordInput && strengthIndicator) {
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/)) strength++;
+            if (password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            const percent = (strength / 5) * 100;
+            strengthIndicator.style.background = `linear-gradient(to right, 
+                ${getStrengthColor(strength)} ${percent}%, 
+                #eee ${percent}%)`;
+        });
+    }
+    
+    // Password confirmation validation
+    const confirmInput = document.getElementById('confirm_password');
+    const passwordForm = document.querySelector('form');
+    
+    if (confirmInput && passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            if (passwordInput.value !== confirmInput.value) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+            }
+        });
+    }
+    
+    // Profile picture preview
+    const pictureInput = document.getElementById('profile_picture');
+    const currentPicture = document.querySelector('.current-picture');
+    
+    if (pictureInput && currentPicture) {
+        pictureInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentPicture.src = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    }
+});
+
+function getStrengthColor(strength) {
+    switch(strength) {
+        case 0:
+        case 1:
+            return '#dc3545'; // red
+        case 2:
+        case 3:
+            return '#ffc107'; // yellow
+        case 4:
+        case 5:
+            return '#28a745'; // green
+        default:
+            return '#eee';
+    }
+}
+</script>
+{% endblock %} 
