@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-03-10T16:30:00.000Z" agent="Mozilla/5.0" version="21.1.8" type="device">
+  <diagram id="database-schema" name="Database Schema">
+    <mxGraphModel dx="1422" dy="798" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Users Collection -->
+        <mxCell id="users" value="users" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="240" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="users-fields" value="+ _id: ObjectId&#xa;+ username: String (unique, required)&#xa;+ email: String (unique, required)&#xa;+ password_hash: String (required)&#xa;+ role: String (enum: user, admin, moderator)&#xa;+ created_at: DateTime&#xa;+ is_active: Boolean&#xa;+ last_login: DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="users">
+          <mxGeometry y="26" width="240" height="154" as="geometry" />
+        </mxCell>
+
+        <!-- Posts Collection -->
+        <mxCell id="posts" value="posts" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;" vertex="1" parent="1">
+          <mxGeometry x="360" y="40" width="240" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="posts-fields" value="+ _id: ObjectId&#xa;+ title: String (required)&#xa;+ description: String (required)&#xa;+ category: String (enum)&#xa;+ status: String (enum)&#xa;+ author_id: ObjectId (ref: users)&#xa;+ location: {&#xa;    type: Point,&#xa;    coordinates: [Number]&#xa;}&#xa;+ created_at: DateTime&#xa;+ is_deleted: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="posts">
+          <mxGeometry y="26" width="240" height="194" as="geometry" />
+        </mxCell>
+
+        <!-- Suggestions Collection -->
+        <mxCell id="suggestions" value="suggestions" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;" vertex="1" parent="1">
+          <mxGeometry x="680" y="40" width="240" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="suggestions-fields" value="+ _id: ObjectId&#xa;+ post_id: ObjectId (ref: posts)&#xa;+ author_id: ObjectId (ref: users)&#xa;+ content: String (required)&#xa;+ upvotes: Number (default: 0)&#xa;+ upvoters: [ObjectId] (ref: users)&#xa;+ created_at: DateTime&#xa;+ is_deleted: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="suggestions">
+          <mxGeometry y="26" width="240" height="154" as="geometry" />
+        </mxCell>
+
+        <!-- Contacts Collection -->
+        <mxCell id="contacts" value="contacts" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="240" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="contacts-fields" value="+ _id: ObjectId&#xa;+ name: String (required)&#xa;+ email: String (required)&#xa;+ category: String (enum)&#xa;+ created_at: DateTime&#xa;+ created_by: ObjectId (ref: users)&#xa;+ is_active: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="contacts">
+          <mxGeometry y="26" width="240" height="134" as="geometry" />
+        </mxCell>
+
+        <!-- Reports Collection -->
+        <mxCell id="reports" value="reports" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;" vertex="1" parent="1">
+          <mxGeometry x="360" y="280" width="240" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="reports-fields" value="+ _id: ObjectId&#xa;+ start_date: DateTime&#xa;+ end_date: DateTime&#xa;+ category: String&#xa;+ status: String&#xa;+ generated_by: ObjectId (ref: users)&#xa;+ created_at: DateTime&#xa;+ posts: [ObjectId] (ref: posts)&#xa;+ sent_to: [ObjectId] (ref: contacts)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="reports">
+          <mxGeometry y="26" width="240" height="174" as="geometry" />
+        </mxCell>
+
+        <!-- Settings Collection -->
+        <mxCell id="settings" value="settings" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#f5f5f5;" vertex="1" parent="1">
+          <mxGeometry x="680" y="280" width="240" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="settings-fields" value="+ _id: ObjectId&#xa;+ site_name: String&#xa;+ site_description: String&#xa;+ contact_email: String&#xa;+ allow_registration: Boolean&#xa;+ email_verification: Boolean&#xa;+ maintenance_mode: Boolean&#xa;+ last_updated: DateTime" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="settings">
+          <mxGeometry y="26" width="240" height="154" as="geometry" />
+        </mxCell>
+
+        <!-- Relationships -->
+        <mxCell id="user-post-rel" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="users-fields" target="posts-fields">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="post-suggestion-rel" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="posts-fields" target="suggestions-fields">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="user-suggestion-rel" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=1;exitY=0.75;entryX=0;entryY=0.25;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="users-fields" target="suggestions-fields">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="user-contact-rel" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="users" target="contacts">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="user-report-rel" value="" style="endArrow=ERmany;html=1;rounded=0;exitX=1;exitY=0.75;entryX=0;entryY=0.5;startArrow=ERone;startFill=0;endFill=0;" edge="1" parent="1" source="users-fields" target="reports-fields">
+          <mxGeometry width="50" height="50" relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile> 

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-03-10T16:30:00.000Z" agent="Mozilla/5.0" version="21.1.8" type="device">
+  <diagram id="class-diagram" name="Class Diagram">
+    <mxGraphModel dx="1422" dy="798" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- User Class -->
+        <mxCell id="user-class" value="User" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="200" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="user-attributes" value="+ id: ObjectId&#xa;+ username: String&#xa;+ email: String&#xa;+ password_hash: String&#xa;+ role: String&#xa;+ created_at: DateTime&#xa;+ is_active: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="user-class">
+          <mxGeometry y="26" width="200" height="114" as="geometry" />
+        </mxCell>
+        <mxCell id="user-methods" value="+ authenticate(): Boolean&#xa;+ create_post(): Post&#xa;+ add_suggestion(): Suggestion&#xa;+ upvote(): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="user-class">
+          <mxGeometry y="140" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Post Class -->
+        <mxCell id="post-class" value="Post" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="40" width="200" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="post-attributes" value="+ id: ObjectId&#xa;+ title: String&#xa;+ description: String&#xa;+ category: String&#xa;+ status: String&#xa;+ author_id: ObjectId&#xa;+ location: GeoPoint&#xa;+ created_at: DateTime&#xa;+ is_deleted: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="post-class">
+          <mxGeometry y="26" width="200" height="144" as="geometry" />
+        </mxCell>
+        <mxCell id="post-methods" value="+ add_suggestion(): void&#xa;+ update_status(): void&#xa;+ delete(): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="post-class">
+          <mxGeometry y="170" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Suggestion Class -->
+        <mxCell id="suggestion-class" value="Suggestion" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="40" width="200" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="suggestion-attributes" value="+ id: ObjectId&#xa;+ post_id: ObjectId&#xa;+ author_id: ObjectId&#xa;+ content: String&#xa;+ upvotes: Integer&#xa;+ created_at: DateTime&#xa;+ is_deleted: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="suggestion-class">
+          <mxGeometry y="26" width="200" height="114" as="geometry" />
+        </mxCell>
+        <mxCell id="suggestion-methods" value="+ upvote(): void&#xa;+ delete(): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="suggestion-class">
+          <mxGeometry y="140" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Contact Class -->
+        <mxCell id="contact-class" value="Contact" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="200" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="contact-attributes" value="+ id: ObjectId&#xa;+ name: String&#xa;+ email: String&#xa;+ category: String&#xa;+ created_at: DateTime&#xa;+ is_active: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="contact-class">
+          <mxGeometry y="26" width="200" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="contact-methods" value="+ update(): void&#xa;+ delete(): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="contact-class">
+          <mxGeometry y="120" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Report Class -->
+        <mxCell id="report-class" value="Report" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="280" width="200" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="report-attributes" value="+ id: ObjectId&#xa;+ start_date: DateTime&#xa;+ end_date: DateTime&#xa;+ category: String&#xa;+ status: String&#xa;+ generated_by: ObjectId&#xa;+ created_at: DateTime&#xa;+ posts: Array[Post]" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="report-class">
+          <mxGeometry y="26" width="200" height="134" as="geometry" />
+        </mxCell>
+        <mxCell id="report-methods" value="+ generate(): void&#xa;+ download(): File" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="report-class">
+          <mxGeometry y="160" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Settings Class -->
+        <mxCell id="settings-class" value="Settings" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="280" width="200" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="settings-attributes" value="+ site_name: String&#xa;+ site_description: String&#xa;+ contact_email: String&#xa;+ allow_registration: Boolean&#xa;+ email_verification: Boolean&#xa;+ maintenance_mode: Boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="settings-class">
+          <mxGeometry y="26" width="200" height="114" as="geometry" />
+        </mxCell>
+        <mxCell id="settings-methods" value="+ update(): void&#xa;+ get_setting(): Any" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="settings-class">
+          <mxGeometry y="140" width="200" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Relationships -->
+        <mxCell id="user-post" value="" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="user-attributes" target="post-attributes">
+          <mxGeometry width="160" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="post-suggestion" value="" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="post-attributes" target="suggestion-attributes">
+          <mxGeometry width="160" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="user-suggestion" value="" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;exitX=1;exitY=0.75;entryX=0;entryY=0.25;" edge="1" parent="1" source="user-attributes" target="suggestion-attributes">
+          <mxGeometry width="160" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-report" value="" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" edge="1" parent="1" source="user-attributes" target="report-attributes">
+          <mxGeometry width="160" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-contact" value="" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="user-class" target="contact-class">
+          <mxGeometry width="160" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-settings" value="" style="endArrow=diamondThin;endFill=1;endSize=24;html=1;rounded=0;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" edge="1" parent="1" source="user-attributes" target="settings-attributes">
+          <mxGeometry width="160" relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile> 
