@@ -6,6 +6,7 @@
     
     <title>{% block title %}{% endblock %} - Suluhisho Hub</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .navbar {
             display: flex;
@@ -159,6 +160,10 @@
         </div>
         <div class="nav-links">
             <a href="{{ url_for('main.index') }}">Home</a>
+            <a href="{{ url_for('map.index') }}">
+                <i class="fas fa-map-marker-alt"></i>
+                Map View
+            </a>
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('posts.create') }}">New Report</a>
                 <div class="nav-item">

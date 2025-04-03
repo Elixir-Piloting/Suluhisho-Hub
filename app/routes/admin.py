@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from functools import wraps
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.models.user import User
 from app.models.post import Post
 from app.models.comment import Comment
@@ -52,9 +52,56 @@ def index():
         'total_comments': current_app.db.comments.count_documents({'is_deleted': False}),
         'total_suggestions': current_app.db.suggestions.count_documents({'is_deleted': False})
     }
-
+    
+    # Get posts by category for pie chart
+    category_data = []
+    for category in ALLOWED_CATEGORIES:
+        count = current_app.db.posts.count_documents({'category': category, 'is_deleted': False})
+        if count > 0:  # Only include categories with posts
+            category_data.append({
+                'category': category,
+                'count': count
+            })
+    
+    # Get activity over time (last 7 days) for line chart
+    now = datetime.utcnow()
+    activity_data = []
+    for i in range(7):
+        day_start = datetime(now.year, now.month, now.day) - timedelta(days=i)
+        day_end = day_start + timedelta(days=1)
+        
+        posts = current_app.db.posts.count_documents({
+            'created_at': {'$gte': day_start, '$lt': day_end},
+            'is_deleted': False
+        })
+        
+        comments = current_app.db.comments.count_documents({
+            'created_at': {'$gte': day_start, '$lt': day_end},
+            'is_deleted': False
+        })
+        
+        reports = current_app.db.reports.count_documents({
+            'created_at': {'$gte': day_start, '$lt': day_end}
+        })
+        
+        activity_data.append({
+            'date': day_start.strftime('%Y-%m-%d'),
+            'posts': posts,
+            'comments': comments,
+            'reports': reports
+        })
+    
+    # Reverse to show oldest to newest
+    activity_data.reverse()
+    
     # Get reports count
     reports_count = Report.get_pending_count(current_app.db)
+    
+    return render_template('admin/index.html',
+                          stats=stats,
+                          category_data=category_data,
+                          activity_data=activity_data,
+                          reports_count=reports_count)
 
     # Get recent activity
     recent_activity = []
@@ -371,9 +418,24 @@ def settings():
 @login_required
 @admin_required
 def generate_report():
+    # Get contacts for email sending
+    contacts = list(current_app.db.contacts.find())
+    
     if request.method == 'POST':
-        start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d')
-        end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d')
+        print('Form data:', request.form)
+        print('Start date:', request.form.get('start_date'))
+        print('End date:', request.form.get('end_date'))
+        print('Category:', request.form.get('category'))
+        print('Status:', request.form.get('status'))
+        try:
+            start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d')
+            end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d')
+            # Set time to start and end of day
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
+        except ValueError:
+            flash('Invalid date format. Please use YYYY-MM-DD format.', 'error')
+            return redirect(url_for('admin.generate_report'))
         category = request.form.get('category')
         status = request.form.get('status')
         
@@ -398,10 +460,19 @@ def generate_report():
             'is_deleted': False  # Only include non-deleted posts
         }
         
-        if category and category != 'All Categories':
+        # Debug query before filters
+        print('Query before filters:', query)
+        
+        if category and category != 'All Categories' and category != '':
             query['category'] = category
-        if status and status != 'All Statuses':
+            print('Added category filter:', category)
+        
+        if status and status != 'All Statuses' and status != '':
             query['status'] = status
+            print('Added status filter:', status)
+        
+        # Debug final query
+        print('Final query:', query)
         
         # Debug: Print query and count
         print(f"Query: {query}")

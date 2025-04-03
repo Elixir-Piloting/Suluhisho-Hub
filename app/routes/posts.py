@@ -7,7 +7,7 @@ from bson import ObjectId
 from datetime import datetime
 import json
 
-bp = Blueprint('posts', __name__)
+bp = Blueprint('posts', __name__, url_prefix='/posts')
 
 ALLOWED_CATEGORIES = [
     'Infrastructure',
@@ -473,13 +473,54 @@ def report():
         'content_type': content_type,
         'content_id': ObjectId(content_id),
         'reporter_id': ObjectId(current_user.get_id()),
+        'reporter_username': current_user.username,  # Add reporter's username
         'reason': reason,
         'details': details,
         'status': 'pending',
         'created_at': datetime.utcnow()
     }
     
+    # Update the content to mark it as reported
+    if content_type == 'post':
+        current_app.db.posts.update_one(
+            {'_id': ObjectId(content_id)},
+            {
+                '$set': {
+                    'is_reported': True,
+                    'reported_at': datetime.utcnow(),
+                    'reported_by': current_user.id,
+                    'reported_by_username': current_user.username,
+                    'report_reason': reason
+                }
+            }
+        )
+    elif content_type == 'comment':
+        current_app.db.comments.update_one(
+            {'_id': ObjectId(content_id)},
+            {
+                '$set': {
+                    'is_reported': True,
+                    'reported_at': datetime.utcnow(),
+                    'reported_by': current_user.id,
+                    'reported_by_username': current_user.username,
+                    'report_reason': reason
+                }
+            }
+        )
+    
     current_app.db.reports.insert_one(report_data)
+    
+    # Create notification for moderators
+    moderators = list(current_app.db.users.find({'is_moderator': True}))
+    for mod in moderators:
+        create_notification(
+            db=current_app.db,
+            user_id=str(mod['_id']),
+            content=f'A {content_type} has been reported. Reason: {reason}',
+            related_type='report',
+            related_id=content_id
+        )
+    
     flash('Content has been reported. Our moderators will review it.', 'success')
     
     # Redirect back to the post

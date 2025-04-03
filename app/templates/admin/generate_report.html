@@ -137,12 +137,12 @@
         <form method="POST">
             <div class="form-group">
                 <label for="start_date">Start Date *</label>
-                <input type="date" id="start_date" name="start_date" required>
+                <input type="date" id="start_date" name="start_date" required pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD">
             </div>
 
             <div class="form-group">
                 <label for="end_date">End Date *</label>
-                <input type="date" id="end_date" name="end_date" required>
+                <input type="date" id="end_date" name="end_date" required pattern="\d{4}-\d{2}-\d{2}" placeholder="YYYY-MM-DD">
             </div>
 
             <div class="form-group">

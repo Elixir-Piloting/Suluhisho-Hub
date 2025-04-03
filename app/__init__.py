@@ -13,6 +13,7 @@ from .routes.mod import bp as mod
 from .routes.notifications import bp as notifications
 from .routes.profile import bp as profile
 from .routes.admin import bp as admin
+from .routes.map import bp as map_bp
 
 # Load environment variables
 load_dotenv()
@@ -174,6 +175,7 @@ def create_app():
     app.register_blueprint(notifications)
     app.register_blueprint(profile)
     app.register_blueprint(admin)
+    app.register_blueprint(map_bp)
     
     # Register template filters
     @app.template_filter('datetime')

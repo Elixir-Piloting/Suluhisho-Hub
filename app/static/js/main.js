@@ -137,4 +137,33 @@ async function fetchJSON(url, options = {}) {
         console.error('Error:', error);
         throw error;
     }
-} 
+}
+
+// Handle post upvotes
+document.addEventListener('DOMContentLoaded', function() {
+    const upvoteButtons = document.querySelectorAll('.upvote-button');
+    
+    upvoteButtons.forEach(button => {
+        button.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const postId = this.dataset.postId;
+            
+            try {
+                const response = await fetchJSON(`/posts/${postId}/upvote`, {
+                    method: 'POST',
+                });
+                
+                // Update the upvote count
+                const countElement = this.querySelector('.upvote-count');
+                if (countElement) {
+                    countElement.textContent = response.upvotes;
+                }
+                
+                // Toggle active state
+                this.classList.toggle('active');
+            } catch (error) {
+                console.error('Error upvoting post:', error);
+            }
+        });
+    });
+});

@@ -117,7 +117,8 @@
 .post-meta {
     font-size: 0.9rem;
     color: #666;
-    margin-bottom: 10px;
+    margin: 15px 0 20px;
+    padding: 0 20px;
 }
 
 .post-meta a {
@@ -152,7 +153,47 @@
     text-align: center;
 }
 
-.post-stats .stat.upvotes i {
+.post-image {
+    margin: -20px -20px 0 -20px;
+    max-height: 200px;
+    overflow: hidden;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.post-content {
+    padding: 15px 20px;
+}
+
+.post-thumbnail {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.post-stats .stat.upvotes {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.post-stats .stat.upvotes:hover {
+    color: #28a745;
+}
+
+.post-stats .stat.upvotes.active {
+    color: #28a745;
+}
+
+.post-stats .stat.upvotes.active i {
     color: #28a745;
 }
 
@@ -267,15 +308,34 @@
                     <span class="post-date">{{ post['created_at']|timeago }}</span>
                 </div>
                 
-                <div class="post-preview">
-                    {{ post['description'][:200] }}{% if post['description']|length > 200 %}...{% endif %}
+                {% if post.get('images') and post['images']|length > 0 %}
+                <div class="post-image">
+                    {% set image_path = post['images'][0] %}
+                    {% if image_path.startswith('uploads/') %}
+                        <img src="{{ url_for('static', filename=image_path) }}" 
+                             alt="Image for {{ post['title'] }}"
+                             class="post-thumbnail">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/' + image_path) }}" 
+                             alt="Image for {{ post['title'] }}"
+                             class="post-thumbnail">
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="post-content">
+
+                    <div class="post-preview">
+                        {{ post['description'][:200] }}{% if post['description']|length > 200 %}...{% endif %}
+                    </div>
                 </div>
                 
                 <div class="post-stats">
-                    <div class="stat upvotes">
+                    <button class="stat upvotes upvote-button {% if current_user.get_id()|string in post.get('upvotes', [])|map('string')|list %}active{% endif %}" 
+                            data-post-id="{{ post['_id']|string }}">
                         <i class="fas fa-thumbs-up"></i>
-                        <span>{{ post['upvotes']|length }}</span>
-                    </div>
+                        <span class="upvote-count">{{ post['upvotes']|length }}</span>
+                    </button>
                     <div class="stat comments">
                         <i class="fas fa-comments"></i>
                         <span>{{ post['comment_count'] }}</span>

@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 .admin-container {
     padding: 20px;
@@ -50,6 +51,21 @@
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
     margin-bottom: 30px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    height: 400px;
 }
 
 .stat-card {
@@ -364,6 +380,15 @@
         </a>
     </div>
 
+    <div class="charts-grid">
+        <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="activityChart"></canvas>
+        </div>
+    </div>
+
     <div class="recent-activity">
         <div class="activity-header">
             <h2 class="activity-title">Recent Activity</h2>
@@ -383,4 +408,84 @@
         </ul>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Posts by Category Pie Chart
+const categoryData = {{ category_data|tojson|safe }};
+const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+const categoryChart = new Chart(categoryCtx, {
+    type: 'pie',
+    data: {
+        labels: categoryData.map(d => d.category),
+        datasets: [{
+            data: categoryData.map(d => d.count),
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                '#9966FF', '#FF9F40', '#7CBA3B', '#B2B2B2'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Posts by Category',
+                font: { size: 16 }
+            },
+            legend: {
+                position: 'right'
+            }
+        }
+    }
+});
+
+// Activity Over Time Line Chart
+const activityData = {{ activity_data|tojson|safe }};
+const activityCtx = document.getElementById('activityChart').getContext('2d');
+const activityChart = new Chart(activityCtx, {
+    type: 'line',
+    data: {
+        labels: activityData.map(d => d.date),
+        datasets: [{
+            label: 'Posts',
+            data: activityData.map(d => d.posts),
+            borderColor: '#36A2EB',
+            tension: 0.1
+        }, {
+            label: 'Comments',
+            data: activityData.map(d => d.comments),
+            borderColor: '#FF6384',
+            tension: 0.1
+        }, {
+            label: 'Reports',
+            data: activityData.map(d => d.reports),
+            borderColor: '#FFCE56',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Activity Over Time (Last 7 Days)',
+                font: { size: 16 }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -10,6 +10,88 @@
     padding: 0 1rem;
 }
 
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.filter-select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+.btn-approve {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.btn-approve:hover {
+    background: #218838;
+}
+
+.btn-resolve {
+    background: #ffc107;
+    color: #000;
+    border: none;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.btn-resolve:hover {
+    background: #e0a800;
+}
+
 .section-title {
     font-size: 1.5rem;
     margin-bottom: 1rem;
@@ -115,6 +197,49 @@
 {% block content %}
 <div class="mod-container">
     <h1 class="section-title">Moderator Dashboard</h1>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_reports }}</div>
+            <div class="stat-label">Total Reports</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.pending_posts }}</div>
+            <div class="stat-label">Pending Posts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.resolved_reports }}</div>
+            <div class="stat-label">Resolved Reports</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.removed_content }}</div>
+            <div class="stat-label">Removed Content</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <form method="get" class="filter-form">
+            <div class="filter-group">
+                <label class="filter-label">Status:</label>
+                <select name="status" class="filter-select" onchange="this.form.submit()">
+                    <option value="reported" {% if current_status == 'reported' %}selected{% endif %}>Reported</option>
+                    <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="all" {% if current_status == 'all' %}selected{% endif %}>All</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Type:</label>
+                <select name="type" class="filter-select" onchange="this.form.submit()">
+                    <option value="all" {% if current_type == 'all' %}selected{% endif %}>All Content</option>
+                    <option value="posts" {% if current_type == 'posts' %}selected{% endif %}>Posts Only</option>
+                    <option value="comments" {% if current_type == 'comments' %}selected{% endif %}>Comments Only</option>
+                    <option value="suggestions" {% if current_type == 'suggestions' %}selected{% endif %}>Suggestions Only</option>
+                </select>
+            </div>
+        </form>
+    </div>
     
     <div class="content-grid">
         <div class="content-section">
@@ -133,11 +258,29 @@
                             <div class="item-content">{{ post.description[:200] }}...</div>
                             <div class="item-actions">
                                 <a href="{{ url_for('posts.view', post_id=post._id) }}" 
-                                   class="btn-primary" target="_blank">View</a>
+                                   class="btn-primary" target="_blank">
+                                   <i class="fas fa-external-link-alt"></i> View
+                                </a>
+                                <form method="POST" 
+                                      action="{{ url_for('mod.approve_post', post_id=post._id) }}"
+                                      class="d-inline">
+                                    <button type="submit" class="btn-approve">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                </form>
+                                <form method="POST" 
+                                      action="{{ url_for('mod.resolve_report', post_id=post._id) }}"
+                                      class="d-inline">
+                                    <button type="submit" class="btn-resolve">
+                                        <i class="fas fa-check-circle"></i> Resolve
+                                    </button>
+                                </form>
                                 <form method="POST" 
                                       action="{{ url_for('mod.remove_post', post_id=post._id) }}"
                                       onsubmit="return confirm('Remove this post?')">
-                                    <button type="submit" class="btn-remove">Remove</button>
+                                    <button type="submit" class="btn-remove">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
                                 </form>
                             </div>
                         </div>
